@@ -171,14 +171,18 @@ def verify_email():
         from random import randint
         otp = randint(100000,999999)
         body = f"Greetings,\nFind your OTP here: {otp}\nEnter this into the application to complete the verification\nRegards,\nAlumni Affairs"
-        gmail_send_message(email,subj,body)
-        verifyKey.acquire()
-        verifycursor.execute(f"SELECT EMAIL FROM VERIF WHERE EMAIL = '{email}'")
-        results = verifycursor.fetchall()
-        if len(results) == 0:
-            verifycursor.execute(f"INSERT INTO VERIF VALUES ('{email}','{str(otp)}')")
-            verifydb.commit()
-            verifyKey.release()
+        try :
+            gmail_send_message(email,subj,body)
+            verifyKey.acquire()
+            verifycursor.execute(f"SELECT EMAIL FROM VERIF WHERE EMAIL = '{email}'")
+            results = verifycursor.fetchall()
+            if len(results) == 0:
+                verifycursor.execute(f"INSERT INTO VERIF VALUES ('{email}','{str(otp)}')")
+                verifydb.commit()
+                verifyKey.release()
+                return "OK"
+        except:
+            return "ERROR"
             
         else:
             verifycursor.execute(f"UPDATE VERIF SET SECRET = '{str(otp)}' WHERE EMAIL = '{email}'")
